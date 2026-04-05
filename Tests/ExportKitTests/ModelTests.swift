@@ -76,4 +76,20 @@ struct ModelTests {
         #expect(decoded == configuration)
         #expect(decoded.numberingStyle.render(number: 4) == "IV")
     }
+
+    @Test func exportHeaderFooterConfigurationBackfillsEvenChrome() throws {
+        let configuration = ExportHeaderFooterConfiguration(
+            firstHeader: ExportHeaderFooter(center: .plain("First header")),
+            header: ExportHeaderFooter(center: .plain("Odd header")),
+            footer: ExportHeaderFooter(right: .plain("Odd footer")),
+            differentOddEven: true
+        )
+
+        let data = try JSONEncoder().encode(configuration)
+        let decoded = try JSONDecoder().decode(ExportHeaderFooterConfiguration.self, from: data)
+
+        #expect(decoded.firstHeader?.center.plainText == "First header")
+        #expect(decoded.evenHeader?.center.plainText == "Odd header")
+        #expect(decoded.evenFooter?.right.plainText == "Odd footer")
+    }
 }

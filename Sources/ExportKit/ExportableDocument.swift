@@ -172,21 +172,81 @@ public struct ExportHeaderFooter: Codable, Sendable, Equatable {
 }
 
 public struct ExportHeaderFooterConfiguration: Codable, Sendable, Equatable {
+    public var firstHeader: ExportHeaderFooter?
+    public var firstFooter: ExportHeaderFooter?
     public var header: ExportHeaderFooter?
     public var footer: ExportHeaderFooter?
+    public var evenHeader: ExportHeaderFooter?
+    public var evenFooter: ExportHeaderFooter?
     public var differentFirstPage: Bool
     public var differentOddEven: Bool
 
     public init(
+        firstHeader: ExportHeaderFooter? = nil,
+        firstFooter: ExportHeaderFooter? = nil,
         header: ExportHeaderFooter? = nil,
         footer: ExportHeaderFooter? = nil,
+        evenHeader: ExportHeaderFooter? = nil,
+        evenFooter: ExportHeaderFooter? = nil,
         differentFirstPage: Bool = false,
         differentOddEven: Bool = false
     ) {
+        self.firstHeader = firstHeader
+        self.firstFooter = firstFooter
         self.header = header
         self.footer = footer
+        self.evenHeader = differentOddEven ? (evenHeader ?? header) : evenHeader
+        self.evenFooter = differentOddEven ? (evenFooter ?? footer) : evenFooter
         self.differentFirstPage = differentFirstPage
         self.differentOddEven = differentOddEven
+    }
+
+    public var hasAnyHeaderContent: Bool {
+        firstHeader != nil || header != nil || evenHeader != nil
+    }
+
+    public var hasAnyFooterContent: Bool {
+        firstFooter != nil || footer != nil || evenFooter != nil
+    }
+
+    public func resolvedHeaderFooter(
+        pageNumber: Int,
+        pageIndexInSection: Int
+    ) -> (header: ExportHeaderFooter?, footer: ExportHeaderFooter?) {
+        if differentFirstPage, pageIndexInSection == 0 {
+            return (firstHeader, firstFooter)
+        }
+
+        if differentOddEven, pageNumber.isMultiple(of: 2) {
+            return (evenHeader, evenFooter)
+        }
+
+        return (header, footer)
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case firstHeader
+        case firstFooter
+        case header
+        case footer
+        case evenHeader
+        case evenFooter
+        case differentFirstPage
+        case differentOddEven
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            firstHeader: try container.decodeIfPresent(ExportHeaderFooter.self, forKey: .firstHeader),
+            firstFooter: try container.decodeIfPresent(ExportHeaderFooter.self, forKey: .firstFooter),
+            header: try container.decodeIfPresent(ExportHeaderFooter.self, forKey: .header),
+            footer: try container.decodeIfPresent(ExportHeaderFooter.self, forKey: .footer),
+            evenHeader: try container.decodeIfPresent(ExportHeaderFooter.self, forKey: .evenHeader),
+            evenFooter: try container.decodeIfPresent(ExportHeaderFooter.self, forKey: .evenFooter),
+            differentFirstPage: try container.decodeIfPresent(Bool.self, forKey: .differentFirstPage) ?? false,
+            differentOddEven: try container.decodeIfPresent(Bool.self, forKey: .differentOddEven) ?? false
+        )
     }
 }
 
