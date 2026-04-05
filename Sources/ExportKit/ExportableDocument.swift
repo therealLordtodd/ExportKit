@@ -196,15 +196,63 @@ public enum ExportFootnotePlacement: String, Codable, Sendable, Equatable {
     case documentEnd
 }
 
+public enum ExportNumberingStyle: String, Codable, Sendable, Equatable {
+    case arabic
+    case roman
+    case alpha
+    case symbol
+
+    public func render(number: Int) -> String {
+        switch self {
+        case .arabic:
+            return String(number)
+        case .roman:
+            return roman(number)
+        case .alpha:
+            return alpha(number)
+        case .symbol:
+            let symbols = ["*", "†", "‡", "§", "¶"]
+            return symbols[(max(number, 1) - 1) % symbols.count]
+        }
+    }
+
+    private func alpha(_ number: Int) -> String {
+        guard number > 0 else { return "a" }
+        let scalar = UnicodeScalar(((number - 1) % 26) + 65)!
+        return String(Character(scalar)).lowercased()
+    }
+
+    private func roman(_ number: Int) -> String {
+        guard number > 0 else { return "I" }
+        let values: [(Int, String)] = [
+            (1000, "M"), (900, "CM"), (500, "D"), (400, "CD"),
+            (100, "C"), (90, "XC"), (50, "L"), (40, "XL"),
+            (10, "X"), (9, "IX"), (5, "V"), (4, "IV"), (1, "I"),
+        ]
+        var remainder = number
+        var result = ""
+        for (value, symbol) in values {
+            while remainder >= value {
+                result += symbol
+                remainder -= value
+            }
+        }
+        return result
+    }
+}
+
 public struct ExportFootnoteConfiguration: Codable, Sendable, Equatable {
     public var placement: ExportFootnotePlacement
+    public var numberingStyle: ExportNumberingStyle
     public var restartPerSection: Bool
 
     public init(
         placement: ExportFootnotePlacement = .pageBottom,
+        numberingStyle: ExportNumberingStyle = .arabic,
         restartPerSection: Bool = true
     ) {
         self.placement = placement
+        self.numberingStyle = numberingStyle
         self.restartPerSection = restartPerSection
     }
 }

@@ -64,4 +64,16 @@ struct ModelTests {
         #expect(warning.message == "Lost formatting")
         #expect(warning.context == "Table cell B2")
     }
+
+    @Test func exportFootnoteConfigurationCodableRoundTrip() throws {
+        let configuration = ExportFootnoteConfiguration(
+            placement: .documentEnd,
+            numberingStyle: .roman,
+            restartPerSection: false
+        )
+        let data = try JSONEncoder().encode(configuration)
+        let decoded = try JSONDecoder().decode(ExportFootnoteConfiguration.self, from: data)
+        #expect(decoded == configuration)
+        #expect(decoded.numberingStyle.render(number: 4) == "IV")
+    }
 }
