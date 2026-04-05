@@ -1,0 +1,47 @@
+import Foundation
+import Testing
+@testable import ExportKit
+
+@Suite("ExportKit Model Tests")
+struct ModelTests {
+    @Test func documentMetadataCodableRoundTrip() throws {
+        let metadata = DocumentMetadata(title: "Test Doc", author: "Todd", keywords: ["swift", "test"])
+        let data = try JSONEncoder().encode(metadata)
+        let decoded = try JSONDecoder().decode(DocumentMetadata.self, from: data)
+        #expect(decoded == metadata)
+    }
+
+    @Test func exportTextContentPlain() {
+        let content = ExportTextContent.plain("Hello world")
+        #expect(content.plainText == "Hello world")
+        #expect(content.runs.count == 1)
+    }
+
+    @Test func exportTextRunDefaults() {
+        let run = ExportTextRun(text: "plain")
+        #expect(run.bold == false)
+        #expect(run.italic == false)
+        #expect(run.link == nil)
+    }
+
+    @Test func exportBlockCodableRoundTrip() throws {
+        let block = ExportBlock(
+            type: .heading,
+            content: .heading(.plain("Title"), level: 1)
+        )
+        let data = try JSONEncoder().encode(block)
+        let decoded = try JSONDecoder().decode(ExportBlock.self, from: data)
+        #expect(decoded == block)
+    }
+
+    @Test func exportBlockTypeRawValues() {
+        #expect(ExportBlockType.paragraph.rawValue == "paragraph")
+        #expect(ExportBlockType.codeBlock.rawValue == "codeBlock")
+    }
+
+    @Test func importWarningStoresContext() {
+        let warning = ImportWarning(message: "Lost formatting", context: "Table cell B2")
+        #expect(warning.message == "Lost formatting")
+        #expect(warning.context == "Table cell B2")
+    }
+}
