@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 public struct DocumentMetadata: Codable, Sendable, Equatable {
@@ -27,15 +28,18 @@ public struct DocumentMetadata: Codable, Sendable, Equatable {
 
 public struct ExportBlock: Identifiable, Codable, Sendable, Equatable {
     public let id: UUID
+    public var sourceIdentifier: String?
     public var type: ExportBlockType
     public var content: ExportBlockContent
 
     public init(
         id: UUID = UUID(),
+        sourceIdentifier: String? = nil,
         type: ExportBlockType,
         content: ExportBlockContent
     ) {
         self.id = id
+        self.sourceIdentifier = sourceIdentifier
         self.type = type
         self.content = content
     }
@@ -107,18 +111,163 @@ public struct ExportTextRun: Codable, Sendable, Equatable {
     }
 }
 
+public struct ExportPageMargins: Codable, Sendable, Equatable {
+    public var top: CGFloat
+    public var leading: CGFloat
+    public var bottom: CGFloat
+    public var trailing: CGFloat
+
+    public init(
+        top: CGFloat,
+        leading: CGFloat,
+        bottom: CGFloat,
+        trailing: CGFloat
+    ) {
+        self.top = top
+        self.leading = leading
+        self.bottom = bottom
+        self.trailing = trailing
+    }
+}
+
+public struct ExportPageTemplate: Codable, Sendable, Equatable {
+    public var size: CGSize
+    public var margins: ExportPageMargins
+    public var columns: Int
+    public var columnSpacing: CGFloat
+    public var headerHeight: CGFloat
+    public var footerHeight: CGFloat
+
+    public init(
+        size: CGSize,
+        margins: ExportPageMargins,
+        columns: Int = 1,
+        columnSpacing: CGFloat = 18,
+        headerHeight: CGFloat = 0,
+        footerHeight: CGFloat = 0
+    ) {
+        self.size = size
+        self.margins = margins
+        self.columns = columns
+        self.columnSpacing = columnSpacing
+        self.headerHeight = headerHeight
+        self.footerHeight = footerHeight
+    }
+}
+
+public struct ExportHeaderFooter: Codable, Sendable, Equatable {
+    public var left: ExportTextContent
+    public var center: ExportTextContent
+    public var right: ExportTextContent
+
+    public init(
+        left: ExportTextContent = ExportTextContent(runs: []),
+        center: ExportTextContent = ExportTextContent(runs: []),
+        right: ExportTextContent = ExportTextContent(runs: [])
+    ) {
+        self.left = left
+        self.center = center
+        self.right = right
+    }
+}
+
+public struct ExportHeaderFooterConfiguration: Codable, Sendable, Equatable {
+    public var header: ExportHeaderFooter?
+    public var footer: ExportHeaderFooter?
+    public var differentFirstPage: Bool
+    public var differentOddEven: Bool
+
+    public init(
+        header: ExportHeaderFooter? = nil,
+        footer: ExportHeaderFooter? = nil,
+        differentFirstPage: Bool = false,
+        differentOddEven: Bool = false
+    ) {
+        self.header = header
+        self.footer = footer
+        self.differentFirstPage = differentFirstPage
+        self.differentOddEven = differentOddEven
+    }
+}
+
+public enum ExportFootnotePlacement: String, Codable, Sendable, Equatable {
+    case pageBottom
+    case sectionEnd
+    case documentEnd
+}
+
+public struct ExportFootnoteConfiguration: Codable, Sendable, Equatable {
+    public var placement: ExportFootnotePlacement
+    public var restartPerSection: Bool
+
+    public init(
+        placement: ExportFootnotePlacement = .pageBottom,
+        restartPerSection: Bool = true
+    ) {
+        self.placement = placement
+        self.restartPerSection = restartPerSection
+    }
+}
+
+public struct ExportFootnote: Identifiable, Codable, Sendable, Equatable {
+    public let id: UUID
+    public var anchorSourceIdentifier: String
+    public var content: ExportTextContent
+
+    public init(
+        id: UUID = UUID(),
+        anchorSourceIdentifier: String,
+        content: ExportTextContent
+    ) {
+        self.id = id
+        self.anchorSourceIdentifier = anchorSourceIdentifier
+        self.content = content
+    }
+}
+
+public struct ExportSection: Identifiable, Codable, Sendable, Equatable {
+    public let id: UUID
+    public var blocks: [ExportBlock]
+    public var pageTemplate: ExportPageTemplate
+    public var headerFooter: ExportHeaderFooterConfiguration?
+    public var footnotes: [ExportFootnote]
+    public var startPageNumber: Int?
+
+    public init(
+        id: UUID = UUID(),
+        blocks: [ExportBlock],
+        pageTemplate: ExportPageTemplate,
+        headerFooter: ExportHeaderFooterConfiguration? = nil,
+        footnotes: [ExportFootnote] = [],
+        startPageNumber: Int? = nil
+    ) {
+        self.id = id
+        self.blocks = blocks
+        self.pageTemplate = pageTemplate
+        self.headerFooter = headerFooter
+        self.footnotes = footnotes
+        self.startPageNumber = startPageNumber
+    }
+}
+
 public struct ExportableDocument: Sendable {
     public var blocks: [ExportBlock]
     public var metadata: DocumentMetadata
+    public var sections: [ExportSection]
+    public var footnoteConfiguration: ExportFootnoteConfiguration?
     public var images: [UUID: Data]
 
     public init(
         blocks: [ExportBlock],
         metadata: DocumentMetadata,
+        sections: [ExportSection] = [],
+        footnoteConfiguration: ExportFootnoteConfiguration? = nil,
         images: [UUID: Data] = [:]
     ) {
         self.blocks = blocks
         self.metadata = metadata
+        self.sections = sections
+        self.footnoteConfiguration = footnoteConfiguration
         self.images = images
     }
 }
