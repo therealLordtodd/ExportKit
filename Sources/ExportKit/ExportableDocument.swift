@@ -62,8 +62,8 @@ public enum ExportBlockContent: Codable, Sendable, Equatable {
     case blockQuote(ExportTextContent)
     case codeBlock(code: String, language: String?)
     case list(ExportTextContent, ordered: Bool, indentLevel: Int)
-    case table(rows: [[ExportTextContent]])
-    case image(data: Data?, url: URL?, altText: String?)
+    case table(rows: [[ExportTextContent]], columnWidths: [CGFloat]?, caption: ExportTextContent?)
+    case image(data: Data?, url: URL?, altText: String?, size: CGSize?)
     case divider
 }
 

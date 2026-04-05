@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import Testing
 @testable import ExportKit
@@ -26,8 +27,27 @@ struct ModelTests {
 
     @Test func exportBlockCodableRoundTrip() throws {
         let block = ExportBlock(
-            type: .heading,
-            content: .heading(.plain("Title"), level: 1)
+            type: .table,
+            content: .table(
+                rows: [[.plain("Q1"), .plain("Q2")]],
+                columnWidths: [160, 120],
+                caption: .plain("Quarterly Results")
+            )
+        )
+        let data = try JSONEncoder().encode(block)
+        let decoded = try JSONDecoder().decode(ExportBlock.self, from: data)
+        #expect(decoded == block)
+    }
+
+    @Test func exportImageBlockPreservesDeclaredSize() throws {
+        let block = ExportBlock(
+            type: .image,
+            content: .image(
+                data: Data([0x89, 0x50, 0x4E, 0x47]),
+                url: nil,
+                altText: "Chart",
+                size: CGSize(width: 320, height: 180)
+            )
         )
         let data = try JSONEncoder().encode(block)
         let decoded = try JSONDecoder().decode(ExportBlock.self, from: data)
