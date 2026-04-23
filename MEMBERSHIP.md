@@ -28,7 +28,7 @@ This primitive is a member of the Document Editor primitive family. It is the **
 1. **Exporter protocol changes are HIGH-RIPPLE** — affects DocumentPrimitive, RichTextEditorKit, and every host-registered exporter (file-format exporters, print exporters, etc.).
 2. Changes to the registration / lookup model: affects every place where hosts wire up exporters at startup.
 3. Adding new protocol requirements without default implementations: breaks existing exporters; use default impls.
-4. Consult [dependency audit §5](../docs/plans/2026-04-19-document-editor-dependency-audit.md).
+4. Consult [dependency audit §5](../RichTextEditorKit/docs/plans/2026-04-19-document-editor-dependency-audit.md).
 5. Document ripple impact in the commit/PR.
 
 ## Note — Potentially Consumed Outside the Family
