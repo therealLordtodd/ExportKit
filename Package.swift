@@ -20,14 +20,14 @@ let package = Package(
     ],
     products: [
         .library(name: "ExportKit", targets: ["ExportKit"]),
-        .library(name: "ExportKitSeams", targets: ["ExportKitSeams"]),
+        .library(name: "ExportKitAISeams", targets: ["ExportKitAISeams"]),
     ],
     dependencies: [
         aiSeamsDependency,
     ],
     targets: [
         .target(name: "ExportKit"),
-        .target(name: "ExportKitSeams", dependencies: [
+        .target(name: "ExportKitAISeams", dependencies: [
             "ExportKit",
             .product(name: "AISeamsKit", package: "AISeamsKit"),
         ]),
