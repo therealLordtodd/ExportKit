@@ -84,14 +84,10 @@ public struct ExportAISurface: AISurface, Sendable {
                 description: "List all registered export formats.",
                 tier: .observe
             ) { _ in
-                AIActionResult(
-                    success: true,
-                    message: "Found \(formats.count) available format(s).",
-                    data: [
-                        "formats": .array(formats.map { .string($0) }),
-                        "count": .int(formats.count),
-                    ]
-                )
+                AIActionResult.succeeded(data: [
+                    "formats": .array(formats.map { .string($0) }),
+                    "count": .int(formats.count),
+                ])
             },
 
             AIAction(
@@ -107,14 +103,10 @@ public struct ExportAISurface: AISurface, Sendable {
                         "status": .string(job.status),
                     ])
                 }
-                return AIActionResult(
-                    success: true,
-                    message: activeJobs.isEmpty ? "No active jobs." : "\(activeJobs.count) active job(s).",
-                    data: [
-                        "jobs": .array(jobValues),
-                        "activeCount": .int(activeJobCount),
-                    ]
-                )
+                return .succeeded(data: [
+                    "jobs": .array(jobValues),
+                    "activeCount": .int(activeJobCount),
+                ])
             },
 
             // Act
@@ -138,19 +130,19 @@ public struct ExportAISurface: AISurface, Sendable {
                 ]
             ) { params in
                 guard let format = params["format"]?.stringValue else {
-                    return AIActionResult(success: false, message: "Missing required 'format' parameter.")
+                    return .failed(code: "missing_parameter", message: "Missing required 'format' parameter.")
                 }
                 guard let destination = params["destination"]?.stringValue else {
-                    return AIActionResult(success: false, message: "Missing required 'destination' parameter.")
+                    return .failed(code: "missing_parameter", message: "Missing required 'destination' parameter.")
                 }
                 guard formats.contains(format) else {
-                    return AIActionResult(
-                        success: false,
+                    return .failed(
+                        code: "unknown_format",
                         message: "Unknown format '\(format)'. Available: \(formats.joined(separator: ", "))."
                     )
                 }
                 try await onStartExport(format, destination)
-                return AIActionResult(success: true, message: "Export started: \(format) -> \(destination).")
+                return .succeeded()
             },
 
             AIAction(
@@ -159,10 +151,10 @@ public struct ExportAISurface: AISurface, Sendable {
                 tier: .act
             ) { _ in
                 guard activeJobCount > 0 else {
-                    return AIActionResult(success: false, message: "No active export to cancel.")
+                    return .failed(code: "no_active_export", message: "No active export to cancel.")
                 }
                 try await onCancelExport()
-                return AIActionResult(success: true, message: "Export cancelled.")
+                return .succeeded()
             },
         ]
     }
