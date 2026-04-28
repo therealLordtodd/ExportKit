@@ -7,11 +7,15 @@ This primitive is a member of the Document Editor primitive family. It is the **
 - [x] [shared-types](../CONVENTIONS/shared-types-convention.md) — **canonical owner** of Exporter protocol
 - [ ] [typed-static-constants](../CONVENTIONS/typed-static-constants-convention.md) — not participating
 - [x] [document-editor-family-membership](../CONVENTIONS/document-editor-family-membership.md)
+- [x] [ai-equal-primitive-convention](../CONVENTIONS/ai-equal-primitive-convention.md) — ships `ExportKitAISeams` + `ExportKitMarpleProbes` layered products
 
 ## Shared Types This Primitive Defines
 
 - **Exporter protocol** — format-agnostic export/import contract
 - Exporter registries / lookup surface
+- **`ExportableDocument`** + **`ExportRegistry`** + **`ExportHeaderFooterConfiguration`** + section / block / page-template / footnote model
+- **`ExportKitAISeams`** library product — `ExportAISurface` registering 1 `AISurface` (`export.jobs`) with action tiers `.observe`, `.act` (export, import) for AI-controllable hosts. (Note: per the AI-Equal Primitive Convention v1.4 explicit-suffix amendment, the canonical name for this product is `ExportKitAISeams`; legacy references to `ExportKitSeams` are out-of-date.)
+- **`ExportKitMarpleProbes`** library product — `ExportKitProbeHost` + 3 `AppProbe` conformances (registry round-trip, import warnings, format round-trip) for AI-verifiable hosts
 - Consumed by: `DocumentPrimitive`, `RichTextEditorKit`, hosts that register exporters
 
 ## Shared Types This Primitive Imports

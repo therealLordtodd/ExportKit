@@ -20,6 +20,23 @@ ExportKit defines the shared importer/exporter protocols and portable export doc
 
 ---
 
+## AI-Equal Infrastructure
+
+This kit ships two opt-in library products that make it AI-controllable and AI-verifiable per the [AI-Equal Primitive Convention](../CONVENTIONS/ai-equal-primitive-convention.md):
+
+- **`ExportKitMarpleProbes`** — `ExportKitProbeHost` + 3 `AppProbe` conformances:
+  - `ExportKitRegistryProbe` — exporter registration / lookup round-trip
+  - `ExportKitImportWarningsProbe` — import-warning surfacing
+  - `ExportKitRoundTripProbe` — exportable-document round-trip fidelity
+  Probe-authoring conventions live at `Sources/ExportKitMarpleProbes/CONVENTIONS.md`.
+- **`ExportKitAISeams`** — `ExportAISurface` registering 1 `AISurface` (`export.jobs`) backed by host-supplied `@Sendable` callbacks. The surface exposes `surfaceState` (active job count, available formats, last export status, active jobs) and `surfaceActions` across two tiers:
+  - `.observe` — `getAvailableFormats`, `getJobStatus`
+  - `.act` — `startExport`, `cancelExport`
+
+Human-only hosts link only `ExportKit` and pay zero cost. AI-equal hosts add the two products. Per the AI-Equal Primitive Convention v1.4 explicit-suffix amendment, the canonical name for the AISeams product is `ExportKitAISeams`; legacy references to `ExportKitSeams` are out-of-date.
+
+---
+
 ## Family Membership — Document Editor
 
 This primitive is a member of the Document Editor primitive family. It participates in shared conventions and consumes or publishes cross-primitive types used by the rich-text / document / editor stack.
