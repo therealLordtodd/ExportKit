@@ -21,9 +21,11 @@ let package = Package(
     products: [
         .library(name: "ExportKit", targets: ["ExportKit"]),
         .library(name: "ExportKitAISeams", targets: ["ExportKitAISeams"]),
+        .library(name: "ExportKitMarpleProbes", targets: ["ExportKitMarpleProbes"]),
     ],
     dependencies: [
         aiSeamsDependency,
+        .package(path: "../Marple"),
     ],
     targets: [
         .target(name: "ExportKit"),
@@ -31,9 +33,24 @@ let package = Package(
             "ExportKit",
             .product(name: "AISeamsKit", package: "AISeamsKit"),
         ]),
+        .target(
+            name: "ExportKitMarpleProbes",
+            dependencies: [
+                "ExportKit",
+                .product(name: "MarpleCore", package: "Marple"),
+            ],
+            exclude: ["CONVENTIONS.md"]
+        ),
         .testTarget(
             name: "ExportKitTests",
             dependencies: ["ExportKit"]
+        ),
+        .testTarget(
+            name: "ExportKitMarpleProbesTests",
+            dependencies: [
+                "ExportKitMarpleProbes",
+                .product(name: "MarpleCore", package: "Marple"),
+            ]
         ),
     ]
 )
