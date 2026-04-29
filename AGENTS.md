@@ -24,6 +24,10 @@ ExportKit defines the shared importer/exporter protocols and portable export doc
 - Preserve `ExportHeaderFooterConfiguration` first/odd/even semantics across formats.
 - Keep `ExportRegistry` thread-safe when adding or looking up importers/exporters.
 
+## UI Posture
+
+N/A — no UI surface. ExportKit defines protocols, registry, and a portable document model; it contains no `View` definitions or theme-driven rendering. Reviewed 2026-04-29 (Theme & HIG audit round 1).
+
 ## Testing
 - Run `swift test` before committing.
 - Add `ExportRegistryTests` for registration and lookup changes.
