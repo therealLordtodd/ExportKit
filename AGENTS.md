@@ -1,5 +1,16 @@
 # ExportKit Working Guide
 
+## Repositories & Local Paths
+
+| Package | Repository | Local Path |
+|---------|------------|------------|
+| **ExportKit** | https://github.com/therealLordtodd/ExportKit.git | `/Users/todd/Building - Apple/Packages/ExportKit` |
+
+## Build & Test
+
+- Build: `swift build`
+- Test: `swift test`
+
 ## Purpose
 ExportKit defines the shared importer/exporter protocols and portable export document model used by concrete document exporters.
 
