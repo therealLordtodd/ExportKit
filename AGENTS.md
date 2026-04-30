@@ -28,6 +28,10 @@ ExportKit defines the shared importer/exporter protocols and portable export doc
 
 N/A — no UI surface. ExportKit defines protocols, registry, and a portable document model; it contains no `View` definitions or theme-driven rendering. Reviewed 2026-04-29 (Theme & HIG audit round 1).
 
+## Performance
+
+Hot paths are `ExportRegistry.exporter(for:)` / `importer(for:)` lookups, exercised whenever a host resolves a format before performing an export or import. Lookups are dictionary `[String: DocumentExporter]` / `[UTType: DocumentImporter]` reads guarded by an `NSLock` — O(1) and allocation-free in the hit path. Document-model construction (`ExportableDocument`, blocks, sections) happens once per export and is the dominant cost when bytes are being produced; ExportKit owns only the model shape, not format-specific marshaling. Concurrency model is `final class: @unchecked Sendable` with an `NSLock` (deliberate: the registry is a process-wide singleton-like; an actor would force every lookup to hop). Reviewed 2026-04-29 (Speed & Clarity audit round 1).
+
 ## Testing
 - Run `swift test` before committing.
 - Add `ExportRegistryTests` for registration and lookup changes.
