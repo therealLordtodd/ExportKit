@@ -2,7 +2,7 @@
 
 `ExportKit` defines a shared document model plus the protocols needed to export and import that model. It is the foundation layer other packages can build on when they want to support Markdown, HTML, PDF, DOCX, or custom formats without inventing a new document contract each time.
 
-This package is deliberately small. It does not ship concrete format implementations, save panels, UI, or a registry.
+This package is deliberately small. It does not ship concrete format implementations, save panels, UI, or file-writing helpers. It does include a lightweight in-memory registry for host-wired importers and exporters.
 
 ## When To Use It
 
@@ -19,6 +19,7 @@ Do not use it if you just need one quick file export path and do not expect to s
 The package has two main surfaces:
 
 - `DocumentExporter` and `DocumentImporter` protocols
+- `ExportRegistry` for registering and resolving host-supplied importers/exporters
 - portable document types like `ExportableDocument`, `ExportBlock`, `ExportTextContent`, `ExportSection`, `DocumentMetadata`, `ImportedDocument`, `ExportOptions`, and `ImportOptions`
 
 The model supports both simple flat documents and paginated/sectioned documents.
@@ -29,6 +30,7 @@ The model supports both simple flat documents and paginated/sectioned documents.
 | --- | --- |
 | `DocumentExporter` | Protocol for exporting an `ExportableDocument` to `Data` |
 | `DocumentImporter` | Protocol for importing raw data into an `ImportedDocument` |
+| `ExportRegistry` | In-memory registry for host-supplied importers and exporters |
 | `ExportableDocument` | The top-level document container |
 | `ExportBlock` | One content block with type, content, and optional source identifier |
 | `ExportBlockContent` | Block variants like text, heading, code block, table, image, and divider |
@@ -192,21 +194,17 @@ Good host-app habits:
 - keep `sourceIdentifier` populated when you need to trace exported blocks back to app objects
 - use `document.blocks` for simple formats like Markdown or plain text
 - use `document.sections` only for paginated formats that genuinely care about page templates and headers/footers
-- keep exporter selection and dependency wiring in the host app, since `ExportKit` does not own a registry
-
-The absence of a registry is intentional. It keeps the package focused on contracts and shared structure instead of turning it into a plugin framework before you actually need one.
+- keep exporter selection and dependency wiring in the host app; use `ExportRegistry` only for the importer/exporter instances the host has intentionally registered
 
 ## Constraints And Notes
 
 - `ExportKit` does not include Markdown, HTML, PDF, or DOCX exporters by itself.
 - It does not include UI for exporting or importing.
+- It does not read from or write to destination URLs; hosts and concrete exporters own filesystem access.
 - Images can be carried inline in block content, in `document.images`, or both, depending on your exporter strategy.
 - `ImportedDocument.warnings` is the right place to record partial-fidelity imports instead of hard-failing every time a feature cannot round-trip perfectly.
 
 ## Platform Support
 
-- macOS 12+
+- macOS 14+
 - iOS 15+
-- tvOS 15+
-- watchOS 8+
-- visionOS 1+

@@ -28,7 +28,15 @@ ExportKit defines the shared importer/exporter protocols and portable export doc
 
 N/A — no UI surface. ExportKit defines protocols, registry, and a portable document model; it contains no `View` definitions or theme-driven rendering. Reviewed 2026-04-29 (Theme & HIG audit round 1).
 
-## Performance
+## Security Posture
+
+`ExportKit` is a Cat 2 document-contract package with opt-in AI and probe products. The core `ExportKit` target owns no credentials, network calls, filesystem reads or writes, database access, durable persistence, pasteboard access, UI, or concrete format implementation. It does own an in-memory `ExportRegistry` guarded by `NSLock`, importer/exporter protocols, and document values that can carry raw `Data`, image bytes, image/file/link `URL`s, metadata, source identifiers, headers/footers, footnotes, import warnings, and document text.
+
+Concrete importers/exporters are host or downstream-package code. They own file access, save/open panels, destination-path allowlists, sandbox/security-scoped bookmarks, network fetches, format parsing, external renderer/tool invocation, sanitization, encryption, retention, logging/audit, and privacy review for document contents and metadata.
+
+`ExportKitAISeams` exposes the `export.jobs` surface through host-supplied start/cancel callbacks. Hosts that link it own action authorization, confirmation UX, destination validation, cancellation semantics, status redaction, audit logging, and any AI policy around what may be exported. `ExportKitMarpleProbes` is developer/test infrastructure; do not expose probe fixtures, probe output, or probe artifacts as production user data.
+
+## Performance Posture
 
 Hot paths are `ExportRegistry.exporter(for:)` / `importer(for:)` lookups, exercised whenever a host resolves a format before performing an export or import. Lookups are dictionary `[String: DocumentExporter]` / `[UTType: DocumentImporter]` reads guarded by an `NSLock` — O(1) and allocation-free in the hit path. Document-model construction (`ExportableDocument`, blocks, sections) happens once per export and is the dominant cost when bytes are being produced; ExportKit owns only the model shape, not format-specific marshaling. Concurrency model is `final class: @unchecked Sendable` with an `NSLock` (deliberate: the registry is a process-wide singleton-like; an actor would force every lookup to hop). Reviewed 2026-04-29 (Speed & Clarity audit round 1).
 
