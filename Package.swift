@@ -6,7 +6,15 @@ import PackageDescription
 private let aiSeamsDependency: Package.Dependency = {
     let localPath = "../AISeamsKit"
     let dir = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
-    if FileManager.default.fileExists(atPath: dir.appendingPathComponent(localPath).path) {
+
+    // Refuse local-path when this manifest is being evaluated as a transitive
+    // dependency (under SwiftPM's `.build/checkouts/`). See Marple commit
+    // 39d67d6 for the full background — short version: the sibling-fetch
+    // creates a conflicting-identity collision with the upstream's URL dep.
+    let isTransitiveCheckout = dir.path.contains("/.build/checkouts/")
+
+    if !isTransitiveCheckout,
+       FileManager.default.fileExists(atPath: dir.appendingPathComponent(localPath).path) {
         return .package(path: localPath)
     }
     return .package(url: "https://github.com/therealLordtodd/AISeamsKit.git", branch: "main")
